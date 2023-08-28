@@ -114,7 +114,7 @@ def get_closest_intersection_octree(octree: octree.Octree, meshes: mesh_list.MFn
 
 
 @timer.timer_decorator
-def get_closest_intersection_bvh(bvh: bvh.BVH, meshes: mesh_list.MFnMeshList, ray:ray.Ray, sample_count: int = 64):
+def get_closest_intersection_bvh(bvh: bvh.BVH, meshes: mesh_list.MFnMeshList, ray:ray.Ray, sample_count: int = 32):
     '''
     Get the closest intersection point for a given ray in a list of meshes, using bvh (Bounding Volume Hierarchy) to accelerate collision checks
 
@@ -122,24 +122,19 @@ def get_closest_intersection_bvh(bvh: bvh.BVH, meshes: mesh_list.MFnMeshList, ra
     '''
     indices_heap = priority_set.PrioritySet()
     bvh.find_intersections(bvh.root, indices_heap, meshes, ray)
-    print(len(indices_heap))
-    print(indices_heap)
-    ray.create_debug_visualizer(1000)
+    ray.create_debug_visualizer(scale=1000)
 
     # Convert to MFloatPoint ahead of time to avoid doing it for every mesh iteration
     ray_origin = om.MFloatPoint(ray.origin)
     ray_direction = om.MFloatVector(ray.direction)
 
-    # TODO remove this
-    sel_list = []
-
     max_param = 9999999
     intersection_count = 0
 
-    while(indices_heap.heap):
-        distances_stack = {}    # Key: Dist ; Value: index
-        intersection_stack = {} # Key: index ; Value: intersection_point
+    distances_stack = {}    # Key: Dist ; Value: index
+    intersection_stack = {} # Key: index ; Value: intersection_point
 
+    while(indices_heap.heap):
         index = indices_heap.pop()
         mesh = meshes.mfn_meshes[index]
         intersection_point = mesh.closestIntersection(ray_origin,                           # raySource
@@ -149,13 +144,12 @@ def get_closest_intersection_bvh(bvh: bvh.BVH, meshes: mesh_list.MFnMeshList, ra
                                                       False)                                # testBothDirections
 
         if intersection_point:
-            # return (meshes.get_name_at_index(index), intersection_point[0])
             intersection_count = intersection_count + 1
             distances_stack[ray_origin.distanceTo(intersection_point[0])] = index
             intersection_stack[index] = intersection_point[0]
         
         if intersection_count == sample_count or intersection_count == len(indices_heap):
-            min_index = distances_stack[min(distances_stack.keys())]    # Take the max as the distances are inverted upon insertion
+            min_index = distances_stack[min(distances_stack.keys())]
             return (meshes.get_name_at_index(min_index), intersection_stack[min_index])
         
     om.MGlobal.displayWarning(f"No intersection found for ray [{ray}]")

@@ -2,8 +2,10 @@ import maya.api.OpenMaya as om
 import maya.cmds as cmds
 
 import core.ray as ray
+
 import util.mesh_list as mesh_list
 import util.timer as timer
+import util.debug as debug
 
 
 class Octree():
@@ -16,42 +18,7 @@ class Octree():
         indices = [i for i in range(len(mesh_list.mfn_meshes))]
         self.grid = self._recursive_build(mesh_list, indices, bbox, depth)
         self.max_depth = depth
-
-    def _create_debug_cube(self, bbox: om.MBoundingBox):
-        '''
-        Create a singular debug cube
-        '''
-        min_point = bbox.min
-        max_point = om.MVector(bbox.max)
-
-        center = (min_point + max_point) * 0.5
-        width = max_point.x - min_point.x
-        height = max_point.y - min_point.y
-        depth = max_point.z - min_point.z
-
-        # Create the polyCube
-        name = cmds.polyCube(width=width, height=height, depth=depth, name="octreeDebugCube")[0]
-        cmds.move(center.x, center.y, center.z, name)
-
-    def _create_debug_cubes(self, my_dict: list[om.MBoundingBox]):
-        '''
-        For each node in the octree create a polyCube for debug and visualization purposes
-        '''
-        for key in my_dict:
-            min_point = key.min
-            max_point = om.MVector(key.max)
-
-            center = (min_point + max_point) * 0.5
-            width = max_point.x - min_point.x
-            height = max_point.y - min_point.y
-            depth = max_point.z - min_point.z
-
-            # Create the polyCube
-            name = cmds.polyCube(width=width, height=height, depth=depth, name="customCube")[0]
-            cmds.move(center.x, center.y, center.z, name)
-            if isinstance(my_dict[key], dict):
-                self.create_debug_cubes(my_dict[key])        
-
+      
     def _does_overlap(self, mesh: om.MFnMesh, dagpath: om.MDagPath, bbox: om.MBoundingBox):
         # MFnMesh.boundingBox returns the local space bbox, we need to multiply it by the inclusive matrix
         # (the matrix of all transforms above the MFnMesh, excluding itself)
@@ -145,7 +112,7 @@ class Octree():
         intersected_bboxes = [b for b in my_dict.keys() if ray.intersect_bbox(b)]
         
         for bbox in intersected_bboxes:
-            self._create_debug_cube(bbox)
+            debug.create_cube("octreeDebugCube", bbox, color=(0, 0, 1))
             if isinstance(my_dict[bbox], list):
                 for item in my_dict[bbox]:
                     indices.add(item)

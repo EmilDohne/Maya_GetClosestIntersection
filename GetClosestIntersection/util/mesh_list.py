@@ -10,6 +10,7 @@ class MFnMeshList():
         self.mfn_meshes = []
         self.mfn_dagpaths = []
         self._mesh_list = []
+        self._bbox_cache = [None] * len(meshes)
 
         selection_list = om.MSelectionList()
         for i, mesh in enumerate(meshes):
@@ -26,7 +27,22 @@ class MFnMeshList():
         _bbox = cmds.exactWorldBoundingBox(self._mesh_list)
         self.bbox = om.MBoundingBox(om.MPoint(_bbox[0], _bbox[1], _bbox[2]), om.MPoint(_bbox[3], _bbox[4], _bbox[5]))
 
-            
+    def get_bbox_at_index(self, index: int) -> om.MBoundingBox:
+        '''
+        Get the bbox at a specified index, if it already exists grab the cached result. Otherwise compute on the fly
+        '''
+        try:
+            if self._bbox_cache[index]:
+                return self._bbox_cache[index]
+        except IndexError:
+            om.MGlobal.displayInfo("Tried to access illegal index at MFnMeshList.get_bbox_at_index()")
+        
+        min = self.mfn_meshes[index].boundingBox.min * self.mfn_dagpaths[index].inclusiveMatrix()
+        max = self.mfn_meshes[index].boundingBox.max * self.mfn_dagpaths[index].inclusiveMatrix()
+
+        self._bbox_cache[index] = om.MBoundingBox(min, max)
+        return self._bbox_cache[index]
+
     def get_name_at_index(self, index: int) -> str:
         '''
         Get the name of a mesh by its index
@@ -39,7 +55,10 @@ class MFnMeshList():
             om.MGlobal.displayError("Invalid index provided to get_name_at_index()")
             return None
 
-    def __eq__(self, other):
+    def __len__(self) -> int:
+        return len(self.mfn_meshes)
+
+    def __eq__(self, other) -> bool:
         if isinstance(other, MFnMeshList):
             return self._mesh_list == other._mesh_list
         elif isinstance(other, list):
