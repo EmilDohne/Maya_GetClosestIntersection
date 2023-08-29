@@ -1,13 +1,16 @@
 import maya.api.OpenMaya as om
 import maya.cmds as cmds
 
-def create_cube(name: str, bbox: om.MBoundingBox, color: tuple[float] = (1, 1, 1)):
+def create_cube(name: str, bbox: om.MBoundingBox, color: tuple[float] = (1, 1, 1), group = "Debug"):
     '''
     Create a singular cube from a bounding box for debugging purpose
 
     :param bbox: the bounding box to construct the cube from
     :param color: the color to shade the box, defaults to white
     '''
+    if not cmds.objExists(group):
+        group = cmds.group(em=True, n=group)
+
     min_point = bbox.min
     max_point = om.MVector(bbox.max)
 
@@ -26,3 +29,5 @@ def create_cube(name: str, bbox: om.MBoundingBox, color: tuple[float] = (1, 1, 1
     cmds.setAttr(obj + ".overrideRGBColors", 1)
     for channel, color in zip(rgb, color):
         cmds.setAttr(obj + ".overrideColor%s" %channel, color)
+
+    cmds.parent(obj, group)

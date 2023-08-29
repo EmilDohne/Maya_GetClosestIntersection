@@ -12,16 +12,16 @@ def maya_useNewAPI():
 def initializePlugin(mobject: om.MObject):
     mplugin = om.MFnPlugin(mobject, "EmilDohne", "1.0", "Any")
     try:
-        mplugin.registerContextCommand(screen_space_context.ScreenSpaceContextCommand.COMMAND_NAME, screen_space_context.ScreenSpaceContextCommand.creator)
+        mplugin.registerContextCommand(screen_space_context.ClosestIntersectionContextCommand.COMMAND_NAME, screen_space_context.ClosestIntersectionContextCommand.creator)
     except Exception as e:
-        om.MGlobal.displayError(f"Unable to register '{screen_space_context.ScreenSpaceContextCommand.COMMAND_NAME}' command")
+        om.MGlobal.displayError(f"Unable to register '{screen_space_context.ClosestIntersectionContextCommand.COMMAND_NAME}' command")
         raise(e)
 
 
 def uninitializePlugin(mobject: om.MObject):
     mplugin = om.MFnPlugin(mobject)
     try:
-        mplugin.deregisterContextCommand(screen_space_context.ScreenSpaceContextCommand.COMMAND_NAME)
+        mplugin.deregisterContextCommand(screen_space_context.ClosestIntersectionContextCommand.COMMAND_NAME)
     except Exception as e:
-        om.MGlobal.displayError(f"Unable to deregister '{screen_space_context.ScreenSpaceContextCommand.COMMAND_NAME}' command")
+        om.MGlobal.displayError(f"Unable to deregister '{screen_space_context.ClosestIntersectionContextCommand.COMMAND_NAME}' command")
         raise(e)

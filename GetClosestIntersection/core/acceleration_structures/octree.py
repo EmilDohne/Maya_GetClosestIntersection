@@ -112,7 +112,7 @@ class Octree():
         intersected_bboxes = [b for b in my_dict.keys() if ray.intersect_bbox(b)]
         
         for bbox in intersected_bboxes:
-            debug.create_cube("octreeDebugCube", bbox, color=(0, 0, 1))
+            # debug.create_cube("octreeDebugCube", bbox, color=(0, 0, 1))
             if isinstance(my_dict[bbox], list):
                 for item in my_dict[bbox]:
                     indices.add(item)

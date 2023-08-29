@@ -4,8 +4,9 @@ import maya.api.OpenMayaUI as omui
 import heapq
 
 import core.ray as ray
-import core.octree as octree
-import core.bvh as bvh
+import core.acceleration_structures.octree as octree
+import core.acceleration_structures.bvh as bvh
+
 import util.mesh_list as mesh_list
 import util.timer as timer
 import util.priority_set as priority_set
@@ -35,7 +36,9 @@ def project_to_3d(screen_space_coords) -> ray.Ray:
 @timer.timer_decorator
 def get_closest_intersection(meshes: mesh_list.MFnMeshList, ray: ray.Ray):
     '''
-    Get the closest intersection point for a given ray in a list of meshes
+    Brute-force approach of getting the mesh intersection point for a given ray by iterating all the meshes
+
+    :param meshes: the mesh_list of the whole scene to iterate over
 
     :return: The mesh name the intersection was found for and the hit position or None
     '''
@@ -80,6 +83,8 @@ def get_closest_intersection_octree(octree: octree.Octree, meshes: mesh_list.MFn
     '''
     Get the closest intersection point for a given ray in a list of meshes, using an octree to accelerate collision checks
 
+    :param meshes: the mesh_list of the whole scene to iterate over
+
     :return: The mesh name the intersection was found for and the hit position or None
     '''
     indices = set()
@@ -117,6 +122,11 @@ def get_closest_intersection_octree(octree: octree.Octree, meshes: mesh_list.MFn
 def get_closest_intersection_bvh(bvh: bvh.BVH, meshes: mesh_list.MFnMeshList, ray:ray.Ray, sample_count: int = 32):
     '''
     Get the closest intersection point for a given ray in a list of meshes, using bvh (Bounding Volume Hierarchy) to accelerate collision checks
+
+    :param bvh: The Bounding Volume Hierarchy to be used for the acceleration of mesh collision checks
+    :param meshes: the mesh_list of the whole scene to iterate over
+    :param ray: The ray to cast the intersection from
+    :param sample_count: An artificial limit at which to stop iterating the retrieved (sorted) meshes 
 
     :return: The mesh name the intersection was found for and the hit position or None
     '''

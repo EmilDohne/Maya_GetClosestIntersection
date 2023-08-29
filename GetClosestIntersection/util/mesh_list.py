@@ -1,9 +1,14 @@
 import maya.api.OpenMaya as om
 import maya.cmds as cmds
+
 import util.timer as timer
 
 
 class MFnMeshList():
+    '''
+    A wrapper around a list of meshes which speeds up mesh operations by pre-computing 
+    MFnMesh, MFnDagPath and Bounding Boxes for the given set
+    '''
 
     @timer.timer_decorator
     def __init__(self, meshes: list[str]):
@@ -24,7 +29,7 @@ class MFnMeshList():
             except Exception:
                 om.MGlobal.displayWarning(f"Unable to construct MFnMesh instance for '{mesh}'")
 
-        _bbox = cmds.exactWorldBoundingBox(self._mesh_list)
+        _bbox = cmds.exactWorldBoundingBox(self._mesh_list)     # Use cmds in this case to avoid iterating the mesh_list to construct the bbox
         self.bbox = om.MBoundingBox(om.MPoint(_bbox[0], _bbox[1], _bbox[2]), om.MPoint(_bbox[3], _bbox[4], _bbox[5]))
 
     def get_bbox_at_index(self, index: int) -> om.MBoundingBox:

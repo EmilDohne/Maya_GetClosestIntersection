@@ -1,5 +1,9 @@
+'''
+Separate flavours of timer implementations to be used as decorators, in a scoped manner or manual stopping
+'''
 import time
 import maya.api.OpenMaya as om
+
 
 def timer_decorator(func):
     '''
