@@ -87,6 +87,7 @@ class BVH:
             distance = ray.origin.distanceTo(node.bbox.center)
             for index in node.indices:
                 heap.add(index, -distance)
+                print(heap)
 
         if node.left:
             self.find_intersections(node.left, heap, mesh_list, ray)

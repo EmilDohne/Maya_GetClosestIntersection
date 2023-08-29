@@ -158,9 +158,16 @@ def get_closest_intersection_bvh(bvh: bvh.BVH, meshes: mesh_list.MFnMeshList, ra
             distances_stack[ray_origin.distanceTo(intersection_point[0])] = index
             intersection_stack[index] = intersection_point[0]
         
-        if intersection_count == sample_count or intersection_count == len(indices_heap):
+        # Break early if we reach maximum samples
+        if intersection_count == sample_count:
             min_index = distances_stack[min(distances_stack.keys())]
             return (meshes.get_name_at_index(min_index), intersection_stack[min_index])
-        
+    
+    # Find the closest intersection from our stack and return it
+    if len(distances_stack) > 0:
+            min_index = distances_stack[min(distances_stack.keys())]
+            return (meshes.get_name_at_index(min_index), intersection_stack[min_index])
+
+    # No intersection handling
     om.MGlobal.displayWarning(f"No intersection found for ray [{ray}]")
     return None
