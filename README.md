@@ -102,37 +102,37 @@ Specs used for benchmarking
 
 ---
 
-### [Disney Moana Island Scene](https://www.disneyanimation.com/resources/moana-island-scene/)
+### Full CG Environment
 
 ---
 
 **Scene Info**
-- `Object Count: 00,000`
-- `Tri Count: 00,000,000 `
+- `Object Count: 7341`
+- `Tri Count: 55,262,706 `
 ---
 <details open>
     <summary> Full Data </summary>
 
 |                           | BruteForce    | Octree    | BVH       |
 | ---                       | :--------:    | :----:    | :------:  |
-| Mesh init                 | 000 ms        | 539 ms    | 539 ms    |
+| Mesh init                 | 955 ms        | 955 ms    | 955 ms    |
 | Max Tree Depth*           | N/A           | 3         | 20        |          
-| Accel Structure init      | N/A           | 432 ms    | 75 ms     |
-| **Total Initialization**  | **539 ms**    | **971 ms**| **614 ms**|
+| Accel Structure init      | N/A           | 561 ms    | 137 ms    |
+| **Total Initialization**  | **955 ms**    |**1516 ms**|**1092 ms**|
 |                           |               |           |           | 
-| *Sample 1*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 2*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 3*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 4*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 5*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 6*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 7*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 8*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 9*                | *0000 ms*     | *000 ms*  | *00 ms*   |
-| *Sample 10*               | *0000 ms*     | *000 ms*  | *00 ms*   |
+| *Sample 1*                | *2771 ms*     | *1634 ms* | *137 ms*  |
+| *Sample 2*                | *2129 ms*     | *1641 ms* | *127 ms*  |
+| *Sample 3*                | *2131 ms*     | *1627 ms* | *100 ms*  |
+| *Sample 4*                | *2129 ms*     | *1649 ms* | *132 ms*  |
+| *Sample 5*                | *2133 ms*     | *1630 ms* | *113 ms*  |
+| *Sample 6*                | *2117 ms*     | *1633 ms* | *120 ms*  |
+| *Sample 7*                | *2109 ms*     | *1631 ms* | *119 ms*  |
+| *Sample 8*                | *2149 ms*     | *1627 ms* | *208 ms*  |
+| *Sample 9*                | *2112 ms*     | *2043 ms* | *213 ms*  |
+| *Sample 10*               | *2163 ms*     | *2055 ms* | *156 ms*  |
 |                           |               |           |           |
-| **Median Average**        | **0000 ms**   | **000 ms**| **00 ms** |
-| **Mean Average**          | **0000 ms**   | **000 ms**| **00 ms** |
+| **Median Average**        | **2130 ms**   |**1634 ms**| **130 ms**|
+| **Mean Average**          | **2194 ms**   |**1717 ms**| **143 ms**|
 
 **Max Tree Depth refers to the maximum allowed depth, not necessarily the maximum actual depth*
 
