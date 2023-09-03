@@ -3,9 +3,11 @@ import maya.api.OpenMayaUI as omui
 import maya.cmds as cmds
 
 import core.calculate_intersection as calculate_intersection
+
 import core.acceleration_structures.octree as octree
 import core.acceleration_structures.bvh as bvh
-import util.mesh_list as mesh_list
+
+import util.maya.meshlist as meshlist
 import util.timer as timer
 
 PLUG_IN_NAME = "CalculateClosestIntersection"
@@ -25,8 +27,8 @@ class ClosestIntersectionContext(omui.MPxContext):
         self.setTitleString(ClosestIntersectionContext.TITLE)
 
         # Initialize the acceleration structures and get the mesh list
-        self.mesh_list = mesh_list.MFnMeshList(self.get_meshes_in_scene())
-        self.bvh = bvh.BVH(self.mesh_list, self.mesh_list.bbox, max_depth=20)
+        self.meshlist = meshlist.MFnMeshList(self.get_meshes_in_scene())
+        self.bvh = bvh.BVH(self.meshlist, self.meshlist.bbox)
 
     def get_meshes_in_scene(self) -> list:
         '''
@@ -41,10 +43,10 @@ class ClosestIntersectionContext(omui.MPxContext):
         This does not check for animation! If your meshes move, please implement a function to check for it.
         '''
         scene_meshes = self.get_meshes_in_scene()
-        if not self.mesh_list == scene_meshes:
+        if not self.meshlist == scene_meshes:
             timer.ScopedTimer("Recalculating the MeshList and BVH")
-            self.mesh_list = mesh_list.MFnMeshList(scene_meshes)
-            self.bvh = bvh.BVH(self.mesh_list, self.mesh_list.bbox, max_depth=20)
+            self.meshlist = meshlist.MFnMeshList(scene_meshes)
+            self.bvh = bvh.BVH(self.meshlist, self.meshlist.bbox)
 
     def doPress(self, event, draw_manager, frame_context):
         screen_space_pos = event.position
@@ -53,7 +55,7 @@ class ClosestIntersectionContext(omui.MPxContext):
         self.check_meshes_is_stale()
 
         # Find the closest intersection for the mesh list using a BVH but can be modified to use an octree or brute-force
-        result = calculate_intersection.get_closest_intersection_bvh(self.bvh, self.mesh_list, ray)
+        result = calculate_intersection.get_closest_intersection_bvh(self.bvh, self.meshlist, ray)
         if result:
             om.MGlobal.displayInfo(f"Found intersection for mesh {result[0]} at [{result[1][0], result[1][1], result[1][2]}]")
         

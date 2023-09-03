@@ -1,7 +1,7 @@
 import maya.api.OpenMaya as om
 import maya.cmds as cmds
 
-import util.timer as timer
+import GetClosestIntersection.util.timer as timer
 
 
 class MFnMeshList():

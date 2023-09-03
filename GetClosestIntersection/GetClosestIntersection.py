@@ -1,6 +1,11 @@
+'''
+Maya Plug-In entry point, the initializePlugin and uninitializePlugin functions are required
+for maya to register your plugin
+'''
+
 import maya.api.OpenMaya as om
 
-import context.screen_space_context as screen_space_context
+import GetClosestIntersection.context.screen_space_context as screen_space_context
 
 '''
 Force Maya to only consider and pass API version 2.0 (maya.api.OpenMaya*) objects
