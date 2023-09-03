@@ -1,19 +1,22 @@
 import maya.api.OpenMaya as om
 
-import core.ray as ray
+import GetClosestIntersection.constants as constants
+
+from GetClosestIntersection.core.acceleration_structures.base import AccelerationStructure
+import GetClosestIntersection.core.ray as ray
 
 import GetClosestIntersection.util.maya.meshlist as meshlist
 import GetClosestIntersection.util.timer as timer
 import GetClosestIntersection.util.debug as debug
 
 
-class Octree():
+class Octree(AccelerationStructure):
     '''
     Bounding Box Based Octree to accelerate the computation of closest intersections
     '''
 
     @timer.timer_decorator
-    def __init__(self, meshlist: meshlist.MFnMeshList, bbox = om.MBoundingBox(om.MPoint(-1, -1, -1), om.MPoint(1, 1, 1)), depth = 2):
+    def __init__(self, meshlist: meshlist.MFnMeshList, bbox = om.MBoundingBox(om.MPoint(-1, -1, -1), om.MPoint(1, 1, 1)), depth = 3):
         indices = [i for i in range(len(meshlist.mfn_meshes))]
         self.grid = self._recursive_build(meshlist, indices, bbox, depth)
         self.max_depth = depth
@@ -111,9 +114,49 @@ class Octree():
         intersected_bboxes = [b for b in my_dict.keys() if ray.intersect_bbox(b)]
         
         for bbox in intersected_bboxes:
-            # debug.create_cube("octreeDebugCube", bbox, color=(0, 0, 1))
+            if constants.DEBUG:
+                debug.create_cube("octreeDebugCube", bbox, color=(0, 0, 1))
             if isinstance(my_dict[bbox], list):
                 for item in my_dict[bbox]:
                     indices.add(item)
             else:
                 self.find_intersections(my_dict[bbox], indices, ray)
+
+    @timer.timer_decorator
+    def get_closest_intersection(self, meshes: meshlist.MFnMeshList, ray:ray.Ray):
+        '''
+        Get the closest intersection point for a given ray in a list of meshes
+
+        :param meshes: the meshlist of the whole scene to iterate over
+
+        :return: The mesh name the intersection was found for and the hit position or None
+        '''
+        indices = set()
+        self.find_intersections(self.grid, indices, ray)      # Modify indices set in place
+
+        # Convert to MFloatPoint ahead of time to avoid doing it for every mesh iteration
+        ray_origin = om.MFloatPoint(ray.origin)
+        ray_direction = om.MFloatVector(ray.direction)
+
+        intersections = {}
+        distances = {}
+        max_param = 9999999
+
+        for index in indices:
+            mesh = meshes.mfn_meshes[index]
+            intersection_point = mesh.closestIntersection(ray_origin,                           # raySource
+                                                        ray_direction,                        # rayDirection
+                                                        om.MSpace.kWorld,                     # space
+                                                        max_param,                            # maxParam
+                                                        False)                                # testBothDirections
+            if intersection_point:
+                distances[index] = ray_origin.distanceTo(intersection_point[0])
+                intersections[index] = (intersection_point[0])
+
+        if len(distances) > 0:
+            min_index = min(distances, key=distances.get)   # Get the lowest distance index
+        else:
+            om.MGlobal.displayWarning(f"No intersection found for ray [{ray}]")
+            return None
+
+        return (meshes.get_name_at_index(min_index), intersections[min_index])
