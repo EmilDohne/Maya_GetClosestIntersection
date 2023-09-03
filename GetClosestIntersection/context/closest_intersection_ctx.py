@@ -39,6 +39,8 @@ class ClosestIntersectionContext(omui.MPxContext):
             self.accel_structure = acceleration_structures.Octree(self.meshlist, self.meshlist.bbox)
         elif constants.ACCELERATION_STRUCTURE == "None":
             self.accel_structure = acceleration_structures.BruteForce()
+        else:
+            om.MGlobal.displayError("Invalid choice of Acceleration structure, valid options are: {'None', 'Octree', 'BVH'} ")
 
     def get_meshes_in_scene(self) -> list:
         '''
@@ -62,6 +64,8 @@ class ClosestIntersectionContext(omui.MPxContext):
                 self.accel_structure = acceleration_structures.Octree(self.meshlist, self.meshlist.bbox)
             elif constants.ACCELERATION_STRUCTURE == "None":
                 self.accel_structure = acceleration_structures.BruteForce()
+            else:
+                om.MGlobal.displayError("Invalid choice of Acceleration structure, valid options are: {'None', 'Octree', 'BVH'} ")
 
     def doPress(self, event, draw_manager, frame_context):
         screen_space_pos = event.position
