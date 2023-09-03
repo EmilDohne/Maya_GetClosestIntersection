@@ -14,8 +14,8 @@ class MFnMeshList():
     def __init__(self, meshes: list[str]):
         if len(meshes) == 0:
             om.MGlobal.displayError("Unable to construct MFnMeshList without any input meshes")
-            return
-        self.mfn_meshes = []
+            raise()
+        self.mfn_meshes: list[om.MFnMesh] = []
         self.mfn_dagpaths = []
         self._mesh_list = []
         self._bbox_cache = [None] * len(meshes)

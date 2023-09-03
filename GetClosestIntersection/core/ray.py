@@ -1,6 +1,8 @@
 import maya.api.OpenMaya as om
 import maya.cmds as cmds
 
+import GetClosestIntersection.constants as constants
+
 class Ray():
     
     def __init__(self, origin: list[float] = [0, 0, 0], direction: list[float] = [0, 0, 0]) -> None:
@@ -15,8 +17,14 @@ class Ray():
             | Ray Direction: [{round(self.direction[0], precision)}, {round(self.direction[1], precision)}, {round(self.direction[2], precision)}]"
  
     def create_debug_visualizer(self, scale: int = 10):
-        dir = self.origin + self.direction * scale
-        cmds.curve(degree=1, p=[(self.origin[0], self.origin[1], self.origin[2]), (dir[0], dir[1], dir[2])], name="DebugRay")
+        '''
+        Create a debug line to visualize the ray's path, only executes in constants.DEBUG is True
+
+        :param scale: the overall length (in maya units) for the ray
+        '''
+        if constants.DEBUG:
+            dir = self.origin + self.direction * scale
+            cmds.curve(degree=1, p=[(self.origin[0], self.origin[1], self.origin[2]), (dir[0], dir[1], dir[2])], name="DebugRay")
 
     def intersect_bbox(self, bbox: om.MBoundingBox):
         tmin = (bbox.min - self.origin)

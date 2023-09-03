@@ -11,10 +11,11 @@ import maya.cmds as cmds
 
 class Locator:
 
-    def __init__(self, name: str, position: om.MPoint):
+    def __init__(self, name: str, position: om.MPoint, scale: int = 10):
         self._name = cmds.spaceLocator(absolute = True,
-                                       n = name, 
-                                       p = (position[0], position[1], position[2]))[0]
+                                       n = name)[0]
+        cmds.scale(scale, scale, scale, self._name)
+        cmds.move(position[0], position[1], position[2], self._name)
         self._position = position
 
     @property 
