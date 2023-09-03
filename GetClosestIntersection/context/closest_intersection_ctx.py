@@ -2,13 +2,14 @@ import maya.api.OpenMaya as om
 import maya.api.OpenMayaUI as omui
 import maya.cmds as cmds
 
-import core.calculate_intersection as calculate_intersection
+import GetClosestIntersection.core.project_to_3d as project_to_3d
+import GetClosestIntersection.core.acceleration_structures as acceleration_structures
 
-import core.acceleration_structures.octree as octree
-import core.acceleration_structures.bvh as bvh
+import GetClosestIntersection.constants as constants
 
-import util.maya.meshlist as meshlist
-import util.timer as timer
+import GetClosestIntersection.util.maya.meshlist as meshlist
+import GetClosestIntersection.util.maya.locator as locator
+import GetClosestIntersection.util.timer as timer
 
 PLUG_IN_NAME = "CalculateClosestIntersection"
 
@@ -27,8 +28,17 @@ class ClosestIntersectionContext(omui.MPxContext):
         self.setTitleString(ClosestIntersectionContext.TITLE)
 
         # Initialize the acceleration structures and get the mesh list
-        self.meshlist = meshlist.MFnMeshList(self.get_meshes_in_scene())
-        self.bvh = bvh.BVH(self.meshlist, self.meshlist.bbox)
+        try:
+            self.meshlist = meshlist.MFnMeshList(self.get_meshes_in_scene())
+        except:
+            return
+
+        if constants.ACCELERATION_STRUCTURE == "BVH":
+            self.accel_structure = acceleration_structures.BVH(self.meshlist, self.meshlist.bbox)
+        elif constants.ACCELERATION_STRUCTURE == "Octree":
+            self.accel_structure = acceleration_structures.Octree(self.meshlist, self.meshlist.bbox)
+        elif constants.ACCELERATION_STRUCTURE == "None":
+            self.accel_structure = acceleration_structures.BruteForce()
 
     def get_meshes_in_scene(self) -> list:
         '''
@@ -44,19 +54,26 @@ class ClosestIntersectionContext(omui.MPxContext):
         '''
         scene_meshes = self.get_meshes_in_scene()
         if not self.meshlist == scene_meshes:
-            timer.ScopedTimer("Recalculating the MeshList and BVH")
+            timer.ScopedTimer("Recalculating the MeshList and Acceleration Structure")
             self.meshlist = meshlist.MFnMeshList(scene_meshes)
-            self.bvh = bvh.BVH(self.meshlist, self.meshlist.bbox)
+            if constants.ACCELERATION_STRUCTURE == "BVH":
+                self.accel_structure = acceleration_structures.BVH(self.meshlist, self.meshlist.bbox)
+            elif constants.ACCELERATION_STRUCTURE == "Octree":
+                self.accel_structure = acceleration_structures.Octree(self.meshlist, self.meshlist.bbox)
+            elif constants.ACCELERATION_STRUCTURE == "None":
+                self.accel_structure = acceleration_structures.BruteForce()
 
     def doPress(self, event, draw_manager, frame_context):
         screen_space_pos = event.position
-        ray = calculate_intersection.project_to_3d(screen_space_pos)
+        ray = project_to_3d.project_to_3d(screen_space_pos)
 
         self.check_meshes_is_stale()
 
         # Find the closest intersection for the mesh list using a BVH but can be modified to use an octree or brute-force
-        result = calculate_intersection.get_closest_intersection_bvh(self.bvh, self.meshlist, ray)
+        result = self.accel_structure.get_closest_intersection(self.meshlist, ray)
         if result:
+            if constants.DEBUG:
+                locator.Locator("Intersection_Point_1", result[1])
             om.MGlobal.displayInfo(f"Found intersection for mesh {result[0]} at [{result[1][0], result[1][1], result[1][2]}]")
         
 
